@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Keopi Lead Finder</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #1a1a1a; }
+    .header { background: #000; color: #fff; padding: 1rem 1.25rem; display: flex; align-items: center; gap: 10px; }
+    .header h1 { font-size: 18px; font-weight: 600; }
+    .header span { font-size: 12px; background: #FFD700; color: #000; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+    .container { max-width: 480px; margin: 0 auto; padding: 1rem; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e5e5e5; padding: 1rem 1.25rem; margin-bottom: 12px; }
+    .label { font-size: 12px; color: #888; margin-bottom: 6px; }
+    .tier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .tier-btn { background: #f5f5f5; border: 1px solid #e5e5e5; border-radius: 8px; padding: 8px 10px; font-size: 13px; color: #555; cursor: pointer; text-align: left; }
+    .tier-btn.active { border-color: #000; background: #000; color: #fff; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip { font-size: 12px; padding: 4px 10px; border-radius: 20px; border: 1px solid #e5e5e5; background: #f5f5f5; color: #555; cursor: pointer; }
+    .chip.active { background: #000; border-color: #000; color: #fff; }
+    input, select { width: 100%; padding: 9px 12px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 14px; margin-bottom: 10px; outline: none; }
+    input:focus, select:focus { border-color: #000; }
+    .search-btn { width: 100%; padding: 12px; background: #FFD700; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; color: #000; cursor: pointer; margin-top: 4px; }
+    .search-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .tabs { display: flex; border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+    .tab { flex: 1; padding: 9px; background: #f5f5f5; border: none; font-size: 13px; color: #888; cursor: pointer; }
+    .tab.active { background: #fff; color: #000; font-weight: 600; }
+    .lead-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 10px; }
+    .lead-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: #000; color: #FFD700; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+    .lead-name { font-size: 15px; font-weight: 600; }
+    .lead-title { font-size: 12px; color: #888; margin-top: 2px; }
+    .lead-row { font-size: 13px; color: #555; padding: 3px 0; }
+    .badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; margin-left: 6px; }
+    .badge-1 { background: #d4edda; color: #155724; }
+    .badge-2 { background: #fff3cd; color: #856404; }
+    .actions { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid #f0f0f0; }
+    .act-btn { flex: 1; padding: 7px; font-size: 12px; border: 1px solid #e5e5e5; border-radius: 8px; background: #f5f5f5; cursor: pointer; }
+    .act-btn:active { background: #e5e5e5; }
+    .empty { text-align: center; padding: 3rem 1rem; color: #aaa; font-size: 14px; }
+    .results-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .results-count { font-size: 13px; color: #888; }
+    .export-btn { font-size: 12px; padding: 5px 12px; border: 1px solid #e5e5e5; border-radius: 8px; background: #fff; cursor: pointer; }
+    .loading { text-align: center; padding: 3rem 1rem; color: #888; }
+    .spinner { font-size: 24px; animation: spin 1s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error { color: #dc3545; text-align: center; padding: 2rem 1rem; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Keopi Lead Finder</h1>
+    <span>LIVE</span>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('search')">Search</button>
+      <button class="tab" onclick="showTab('results')">Results <span id="count-badge"></span></button>
+    </div>
+
+    <div id="tab-search">
+      <div class="card">
+        <p class="label">Contact tier</p>
+        <div class="tier-grid">
+          <button class="tier-btn active" onclick="toggleTier(this,'1')"><strong>Tier 1</strong><br><small>Events directors</small></button>
+          <button class="tier-btn" onclick="toggleTier(this,'2a')"><strong>Tier 2a</strong><br><small>Workplace & office</small></button>
+          <button class="tier-btn" onclick="toggleTier(this,'2b')"><strong>Tier 2b</strong><br><small>People & HR</small></button>
+          <button class="tier-btn" onclick="toggleTier(this,'2c')"><strong>Tier 2c</strong><br><small>Marketing & brand</small></button>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="label">Event triggers (optional)</p>
+        <div class="chips">
+          <span class="chip" onclick="toggleChip(this)">New office opening</span>
+          <span class="chip" onclick="toggleChip(this)">Return to office</span>
+          <span class="chip" onclick="toggleChip(this)">Employee appreciation</span>
+          <span class="chip" onclick="toggleChip(this)">Holiday party</span>
+          <span class="chip" onclick="toggleChip(this)">Team building</span>
+          <span class="chip" onclick="toggleChip(this)">Wellness week</span>
+          <span class="chip" onclick="toggleChip(this)">Product launch</span>
+          <span class="chip" onclick="toggleChip(this)">Conference</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="label">City</p>
+        <input type="text" id="city" placeholder="e.g. Toronto" />
+        <p class="label">Company size</p>
+        <select id="size">
+          <option value="any">Any size</option>
+          <option value="51,200">51–200</option>
+          <option value="201,500" selected>201–500</option>
+          <option value="501,1000">501–1,000</option>
+          <option value="1001,5000">1,001–5,000</option>
+          <option value="5001,99999">5,000+</option>
+        </select>
+      </div>
+
+      <button class="search-btn" id="search-btn" onclick="runSearch()">Find leads</button>
+    </div>
+
+    <div id="tab-results" style="display:none">
+      <div id="results-area"><div class="empty">Run a search to see leads.</div></div>
+    </div>
+  </div>
+
+  <script>
+    const TIERS = {
+      '1':['Director of Events','Corporate Events Manager','Event Planning Manager','Senior Event Planner','Head of Events','VP Corporate Events','Conference Manager','Special Events Director','Meeting Planner','Corporate Event Coordinator'],
+      '2a':['Workplace Experience Manager','Employee Experience Manager','Office Manager','Facilities Manager','Workplace Operations Manager','Workplace Services Manager','Workplace Experience Director'],
+      '2b':['Chief People Officer','VP People','Director of Human Resources','People Operations Manager','Employee Engagement Manager','People & Culture Director','HR Director','Head of People'],
+      '2c':['Experiential Marketing Manager','Events Marketing Manager','Brand Activation Manager','Field Marketing Manager','Head of Marketing','VP Marketing','Experiential Marketing Director']
+    };
+
+    let activeTiers = new Set(['1']);
+    let leads = [];
+
+    function showTab(t) {
+      document.getElementById('tab-search').style.display = t==='search'?'':'none';
+      document.getElementById('tab-results').style.display = t==='results'?'':'none';
+      document.querySelectorAll('.tab').forEach((b,i)=>b.classList.toggle('active',['search','results'][i]===t));
+    }
+
+    function toggleTier(btn,tier) {
+      activeTiers.has(tier)?(activeTiers.delete(tier),btn.classList.remove('active')):(activeTiers.add(tier),btn.classList.add('active'));
+    }
+
+    function toggleChip(el){ el.classList.toggle('active'); }
+
+    function initials(f,l){ return ((f||'')[0]+(l||'')[0]).toUpperCase(); }
+
+    function tierLabel(title) {
+      if(!title) return '2';
+      const t = title.toLowerCase();
+      return ['event','events','conference','meeting planner','special events'].some(k=>t.includes(k))?'1':'2';
+    }
+
+    async function runSearch() {
+      if(activeTiers.size===0){alert('Select at least one tier.');return;}
+      const titles = [...activeTiers].flatMap(t=>TIERS[t]);
+      const city = document.getElementById('city').value.trim();
+      const sizeVal = document.getElementById('size').value;
+      const chips = [...document.querySelectorAll('.chip.active')].map(c=>c.textContent);
+      const btn = document.getElementById('search-btn');
+      btn.disabled=true; btn.textContent='Searching…';
+      showTab('results');
+      document.getElementById('results-area').innerHTML='<div class="loading"><div class="spinner">⟳</div><br><br>Finding leads…</div>';
+      const body={per_page:10,person_titles:titles,contact_email_status:['verified','likely to engage']};
+      if(city) body.person_locations=[city];
+      if(sizeVal!=='any') body.organization_num_employees_ranges=[sizeVal];
+      if(chips.length) body.q_keywords=chips.join(' OR ');
+      try {
+        const res = await fetch('/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+        const data = await res.json();
+        if(!res.ok) throw new Error(data.error||'Server error');
+        leads = data.people||[];
+        renderLeads(leads);
+      } catch(e) {
+        document.getElementById('results-area').innerHTML=`<div class="error">Something went wrong: ${e.message}</div>`;
+      }
+      btn.disabled=false; btn.textContent='Find leads';
+    }
+
+    function renderLeads(arr) {
+      document.getElementById('count-badge').textContent=arr.length?`(${arr.length})`:'';
+      if(!arr.length){document.getElementById('results-area').innerHTML='<div class="empty">No leads found. Try broader filters.</div>';return;}
+      document.getElementById('results-area').innerHTML=`
+        <div class="results-header">
+          <span class="results-count">${arr.length} leads found</span>
+          <button class="export-btn" onclick="exportCSV()">⬇ CSV</button>
+        </div>
+        ${arr.map((p,i)=>{
+          const name=[p.first_name,p.last_name].filter(Boolean).join(' ')||'Unknown';
+          const company=p.organization?.name||'—';
+          const email=p.email||'—';
+          const phone=p.phone_numbers?.[0]?.sanitized_number||'—';
+          const loc=[p.city,p.state].filter(Boolean).join(', ')||'—';
+          const tier=tierLabel(p.title);
+          return `<div class="lead-card">
+            <div class="lead-header">
+              <div class="avatar">${initials(p.first_name,p.last_name)}</div>
+              <div>
+                <div class="lead-name">${name}<span class="badge badge-${tier}">Tier ${tier}</span></div>
+                <div class="lead-title">${p.title||'—'}</div>
+              </div>
+            </div>
+            <div class="lead-row">🏢 ${company}</div>
+            <div class="lead-row">✉️ ${email}</div>
+            <div class="lead-row">📞 ${phone}</div>
+            <div class="lead-row">📍 ${loc}</div>
+            <div class="actions">
+              <button class="act-btn" onclick="copyField(${i},'email')">Copy email</button>
+              <button class="act-btn" onclick="copyField(${i},'phone')">Copy phone</button>
+            </div>
+          </div>`;
+        }).join('')}`;
+    }
+
+    function copyField(i,field) {
+      const val = field==='email'?leads[i].email:(leads[i].phone_numbers?.[0]?.sanitized_number||'');
+      if(!val||val==='—'){alert('Not available.');return;}
+      navigator.clipboard.writeText(val).then(()=>alert('Copied: '+val)).catch(()=>alert(val));
+    }
+
+    function exportCSV() {
+      const rows=[['Name','Title','Company','Email','Phone','Location','Tier']];
+      leads.forEach(p=>{
+        const name=[p.first_name,p.last_name].filter(Boolean).join(' ');
+        rows.push([name,p.title||'',p.organization?.name||'',p.email||'',p.phone_numbers?.[0]?.sanitized_number||'',[p.city,p.state].filter(Boolean).join(', '),tierLabel(p.title)]);
+      });
+      const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const a=document.createElement('a');
+      a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+      a.download='keopi_leads.csv';
+      a.click();
+    }
+  </script>
+</body>
+</html>
