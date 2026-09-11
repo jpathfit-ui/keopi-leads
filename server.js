@@ -3,8 +3,18 @@ const cors = require('cors');
 const fetch = require('node-fetch');
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: '*',
+  methods: ['GET','POST'],
+  allowedHeaders: ['Content-Type']
+}));
+
 app.use(express.json());
+
+app.get('/', (req, res) => {
+  res.json({ status: 'Keopi lead server running' });
+});
 
 app.post('/search', async (req, res) => {
   try {
@@ -18,7 +28,7 @@ app.post('/search', async (req, res) => {
     });
     const data = await response.json();
     res.json(data);
-  } catch (e) {
+  } catch(e) {
     res.status(500).json({ error: e.message });
   }
 });
