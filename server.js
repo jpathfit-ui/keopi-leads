@@ -1,19 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 const fetch = require('node-fetch');
+const path = require('path');
 
 const app = express();
 
-app.use(cors({
-  origin: '*',
-  methods: ['GET','POST'],
-  allowedHeaders: ['Content-Type']
-}));
-
+app.use(cors({ origin: '*', methods: ['GET','POST'], allowedHeaders: ['Content-Type'] }));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
-  res.json({ status: 'Keopi lead server running' });
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.post('/search', async (req, res) => {
