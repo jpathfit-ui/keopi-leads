@@ -13,6 +13,18 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+app.get('/test', async (req, res) => {
+  try {
+    const response = await fetch('https://api.apollo.io/api/v1/auth/health', {
+      headers: { 'X-Api-Key': process.env.APOLLO_API_KEY }
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.post('/search', async (req, res) => {
   try {
     const response = await fetch('https://api.apollo.io/api/v1/mixed_people/search', {
